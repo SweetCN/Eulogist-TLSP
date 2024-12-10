@@ -5,6 +5,7 @@ import (
 	Server "Eulogist/proxy/mc_server"
 	"Eulogist/proxy/persistence_data"
 	"fmt"
+	"os"
 	"runtime/debug"
 	"sync"
 
@@ -14,20 +15,25 @@ import (
 // Eulogist 函数是整个“赞颂者”程序的入口点
 func Eulogist() error {
 	var err error
-	var config *EulogistConfig
+	// var config *EulogistConfig
 	var waitGroup sync.WaitGroup
 	var client *Client.MinecraftClient
 	var server *Server.MinecraftServer
 	var clientWasConnected chan struct{}
 	var persistenceData *persistence_data.PersistenceData = new(persistence_data.PersistenceData)
-
-	// 读取配置文件
-	{
-		config, err = ReadEulogistConfig()
-		if err != nil {
-			return fmt.Errorf("Eulogist: %v", err)
-		}
+	var authServerUrl string
+	if len(os.Args) > 1 {
+		authServerUrl = os.Args[1]
+	} else {
+		authServerUrl = "http://localhost:33250"
 	}
+	// 读取配置文件
+	// {
+	// 	config, err = ReadEulogistConfig()
+	// 	if err != nil {
+	// 		return fmt.Errorf("Eulogist: %v", err)
+	// 	}
+	// }
 
 	// 使赞颂者连接到网易租赁服
 	{
@@ -35,10 +41,10 @@ func Eulogist() error {
 
 		server, err = Server.ConnectToServer(
 			Server.BasicConfig{
-				ServerCode:     config.RentalServerCode,
-				ServerPassword: config.RentalServerPassword,
-				Token:          config.FBToken,
-				AuthServer:     LookUpAuthServerAddress(config.FBToken),
+				ServerCode:     "",
+				ServerPassword: "",
+				Token:          "",
+				AuthServer:     authServerUrl,
 			},
 			persistenceData,
 		)
